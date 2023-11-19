@@ -10,7 +10,7 @@
 ██║╚██╔╝██║╚════██║    ██╔══╝  ██╔══██║██╔══██╗██║╚██╔╝██║██╔══╝  ██╔══██╗
 ██║ ╚═╝ ██║███████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗██║  ██║
 ╚═╝     ╚═╝╚══════╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
-       by Charles Bel (@charlesbel)          version 3.0
+       by Charles Bel (@charlesbel) Updated by CodeBanana69          version 3.0
 ```
 
 ![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge)
@@ -19,6 +19,8 @@
 ## :wave: Welcome to the future of automation
 
 ### A simple bot that uses selenium to farm Microsoft Rewards written in Python
+
+Updated as Charles Bel seems to have abandoned the project
 
 ```diff
 - Use it at your own risk, Microsoft may ban your account (and I would not be responsible for it)
