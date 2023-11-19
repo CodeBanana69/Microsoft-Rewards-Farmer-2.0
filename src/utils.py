@@ -202,28 +202,41 @@ class Utils:
         dashboard = self.getDashboardData()
         searchPoints = 1
         counters = dashboard["userStatus"]["counters"]
-        if "pcSearch" not in counters:
+
+        if "pcSearch" not in counters or not counters["pcSearch"]:
             return 0, 0
-        progressDesktop = (
-            counters["pcSearch"][0]["pointProgress"]
-            + counters["pcSearch"][1]["pointProgress"]
-        )
-        targetDesktop = (
-            counters["pcSearch"][0]["pointProgressMax"]
-            + counters["pcSearch"][1]["pointProgressMax"]
-        )
+
+        progressDesktop = 0
+        targetDesktop = 0
+
+        # Ensure the counters list has elements before accessing them
+        if len(counters["pcSearch"]) > 0:
+            progressDesktop += counters["pcSearch"][0]["pointProgress"]
+            targetDesktop += counters["pcSearch"][0]["pointProgressMax"]
+
+        if len(counters["pcSearch"]) > 1:
+            progressDesktop += counters["pcSearch"][1]["pointProgress"]
+            targetDesktop += counters["pcSearch"][1]["pointProgressMax"]
+
         if targetDesktop in [33, 102]:
             # Level 1 or 2 EU
             searchPoints = 3
         elif targetDesktop == 55 or targetDesktop >= 170:
             # Level 1 or 2 US
             searchPoints = 5
+
         remainingDesktop = int((targetDesktop - progressDesktop) / searchPoints)
         remainingMobile = 0
-        if dashboard["userStatus"]["levelInfo"]["activeLevel"] != "Level1":
+
+        if (
+            "mobileSearch" in counters
+            and counters["mobileSearch"]
+            and dashboard["userStatus"]["levelInfo"]["activeLevel"] != "Level1"
+        ):
             progressMobile = counters["mobileSearch"][0]["pointProgress"]
             targetMobile = counters["mobileSearch"][0]["pointProgressMax"]
             remainingMobile = int((targetMobile - progressMobile) / searchPoints)
+
         return remainingDesktop, remainingMobile
 
     def formatNumber(self, number, num_decimals=2):
