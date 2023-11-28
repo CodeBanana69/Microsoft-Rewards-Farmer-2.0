@@ -4,6 +4,8 @@ import logging
 import logging.handlers as handlers
 import random
 import sys
+import atexit
+import psutil
 from pathlib import Path
 
 from src import Browser, DailySet, Login, MorePromotions, PunchCards, Searches
@@ -13,18 +15,29 @@ from src.notifier import Notifier
 
 POINTS_COUNTER = 0
 
-
 def main():
     setupLogging()
     args = argumentParser()
     notifier = Notifier(args)
     loadedAccounts = setupAccounts()
+    
+    # Register the cleanup function to be called on script exit
+    atexit.register(cleanupChromeProcesses)
+
     for currentAccount in loadedAccounts:
         try:
             executeBot(currentAccount, notifier, args)
         except Exception as e:
             logging.exception(f"{e.__class__.__name__}: {e}")
 
+def cleanupChromeProcesses():
+    # Use psutil to find and terminate Chrome processes
+    for process in psutil.process_iter(['pid', 'name']):
+        if process.info['name'] == 'chrome.exe':
+            try:
+                psutil.Process(process.info['pid']).terminate()
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
 
 def setupLogging():
     format = "%(asctime)s [%(levelname)s] %(message)s"
@@ -47,7 +60,6 @@ def setupLogging():
             terminalHandler,
         ],
     )
-
 
 def argumentParser() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Microsoft Rewards Farmer")
@@ -85,21 +97,6 @@ def argumentParser() -> argparse.Namespace:
     )
     return parser.parse_args()
 
-
-def bannerDisplay():
-    farmerBanner = """
-    ███╗   ███╗███████╗    ███████╗ █████╗ ██████╗ ███╗   ███╗███████╗██████╗
-    ████╗ ████║██╔════╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝██╔══██╗
-    ██╔████╔██║███████╗    █████╗  ███████║██████╔╝██╔████╔██║█████╗  ██████╔╝
-    ██║╚██╔╝██║╚════██║    ██╔══╝  ██╔══██║██╔══██╗██║╚██╔╝██║██╔══╝  ██╔══██╗
-    ██║ ╚═╝ ██║███████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗██║  ██║
-    ╚═╝     ╚═╝╚══════╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝"""
-    logging.error(farmerBanner)
-    logging.warning(
-        f"        by Charles Bel (@charlesbel)               version {VERSION}\n"
-    )
-
-
 def setupAccounts() -> dict:
     accountPath = Path(__file__).resolve().parent / "accounts.json"
     if not accountPath.exists():
@@ -118,7 +115,6 @@ def setupAccounts() -> dict:
     loadedAccounts = json.loads(accountPath.read_text(encoding="utf-8"))
     random.shuffle(loadedAccounts)
     return loadedAccounts
-
 
 def executeBot(currentAccount, notifier: Notifier, args: argparse.Namespace):
     logging.info(
