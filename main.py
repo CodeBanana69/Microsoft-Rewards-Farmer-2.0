@@ -15,12 +15,12 @@ from src.notifier import Notifier
 
 POINTS_COUNTER = 0
 
+
 def main():
     setupLogging()
     args = argumentParser()
     notifier = Notifier(args)
     loadedAccounts = setupAccounts()
-    
     # Register the cleanup function to be called on script exit
     atexit.register(cleanupChromeProcesses)
 
@@ -30,6 +30,7 @@ def main():
         except Exception as e:
             logging.exception(f"{e.__class__.__name__}: {e}")
 
+
 def cleanupChromeProcesses():
     # Use psutil to find and terminate Chrome processes
     for process in psutil.process_iter(['pid', 'name']):
@@ -38,6 +39,7 @@ def cleanupChromeProcesses():
                 psutil.Process(process.info['pid']).terminate()
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
+
 
 def setupLogging():
     format = "%(asctime)s [%(levelname)s] %(message)s"
@@ -60,6 +62,7 @@ def setupLogging():
             terminalHandler,
         ],
     )
+
 
 def argumentParser() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Microsoft Rewards Farmer")
@@ -97,6 +100,7 @@ def argumentParser() -> argparse.Namespace:
     )
     return parser.parse_args()
 
+
 def setupAccounts() -> dict:
     accountPath = Path(__file__).resolve().parent / "accounts.json"
     if not accountPath.exists():
@@ -116,9 +120,10 @@ def setupAccounts() -> dict:
     random.shuffle(loadedAccounts)
     return loadedAccounts
 
+
 def executeBot(currentAccount, notifier: Notifier, args: argparse.Namespace):
     logging.info(
-        f'********************{ currentAccount.get("username", "") }********************'
+        f'********************{currentAccount.get("username", "")}********************'
     )
     with Browser(mobile=False, account=currentAccount, args=args) as desktopBrowser:
         accountPointsCounter = Login(desktopBrowser).login()
